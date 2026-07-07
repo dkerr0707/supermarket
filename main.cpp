@@ -2,28 +2,43 @@
 #include <vector>
 #include <unordered_map>
 
+class SpecialPrice {
+
+private:
+    unsigned int m_quantity;
+    unsigned int m_cost;
+
+public:
+    SpecialPrice(unsigned int quantity, unsigned int cost) :
+        m_quantity(quantity), m_cost(cost) {}
+
+    unsigned int getQuantity() { return m_quantity; }
+    unsigned int getCost() { return m_cost; }
+
+};
+
 class Item {
 
 private:
     unsigned int m_cost; // in pennies
-    bool m_special_price;
+    SpecialPrice m_special_price;
 
 public:
-    Item(unsigned int cost, bool special_price) : 
+    Item(unsigned int cost, SpecialPrice special_price) : 
         m_cost(cost), m_special_price(special_price) {}
 
     unsigned int getCost() { return m_cost; }
-    bool getSpecialPrice() { return m_special_price; }
+    SpecialPrice getSpecialPrice() { return m_special_price; }
 
 };
 
 int main() {
 
     std::unordered_map<std::string, Item> item_lookup = {
-        { "apple", Item(25, false) },
-        { "bannana", Item(25, false) },
-        { "oatmeal", Item(50, false) },
-        { "bread", Item(75, false) }
+        { "apple", Item(25, SpecialPrice(3, 50) ) },
+        { "bannana", Item(25, SpecialPrice(0, 0) ) },
+        { "oatmeal", Item(50, SpecialPrice(0, 0) ) },
+        { "bread", Item(75, SpecialPrice(0, 0) ) }
     };
 
     std::vector<std::string> item_list = { "apple", "bannana", "apple", "bread", "oatmeal", "apple" };
@@ -37,7 +52,7 @@ int main() {
 
         std::string sku = it->first;
         Item a = it->second; 
-        std::cout << sku << " " << a.getCost() << " " << a.getSpecialPrice() << "\n";
+        std::cout << sku << " " << a.getCost() << " " << a.getSpecialPrice().getQuantity() << "\n";
         item_sum += a.getCost();
     }
 
