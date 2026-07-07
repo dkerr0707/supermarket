@@ -1,4 +1,6 @@
 #include <iostream>
+#include <vector>
+#include <unordered_map>
 
 class Item {
 
@@ -18,6 +20,26 @@ public:
 };
 
 int main() {
-    Item a = Item("apple", 45, false);
+
+    std::unordered_map<std::string, Item> items_map = {
+        { "apple", Item("apple", 25, false) },
+        { "bannana", Item("bannana", 25, false) },
+        { "oatmeal", Item("oatmeal", 50, false) },
+        { "bread", Item("bread", 75, false) }
+    };
+
+    auto it = items_map.find("apple");
+    if (it == items_map.end()) { std::cout << "Item not in map" << "\n"; return EXIT_FAILURE; }
+    
+    Item a = it->second;
     std::cout << a.getSku() << " " << a.getCost() << " " << a.getSpecialPrice() << "\n";
+
+    std::vector<std::string> item_list = { "apple", "bannana", "apple", "bread", "oatmeal", "apple" };
+    
+    for (auto& i: item_list) {
+        std::cout << i << "\n";
+    }
+
+    return EXIT_SUCCESS;
 }
+
