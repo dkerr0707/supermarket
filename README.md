@@ -23,3 +23,8 @@ apple 4
 Total : $ 2.25
 ```
 
+## TODO
+- Unit tests
+- More advanced build system
+
+
