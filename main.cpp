@@ -12,15 +12,15 @@ using json = nlohmann::json;
 namespace {
 
 // This class holds the logic for special prices
-// Must be in the for of quantity and cost
-// eg 3 for 75 cents
+// Must be in the form of quantity and cost
+// eg 3 for 50 cents
 // eg 2 for one is an quantity of 2 for the cost of a single item
 // eg 20 % off is quantity of 1 and cost of 80 % of the price
 class SpecialPrice {
 
 private:
     unsigned int m_quantity;
-    unsigned int m_cost;
+    unsigned int m_cost; // in cents
 
 public:
 
@@ -32,14 +32,14 @@ public:
 
 };
 
-// Item class holds the cost of each item in pennies and an optional the special price class.
+// Item class holds the cost of each item in cents and an optional special price class.
 // Not all items have a special price.
 // The sku was not necessary in the class because it is kept as
 // the dictionary key. See pricing rules in the main function.
 class Item {
 
 private:
-    unsigned int m_cost; // in pennies
+    unsigned int m_cost; // in cents
     std::optional<SpecialPrice> m_special_price;
 
 public:
@@ -114,10 +114,10 @@ float Checkout::getTotalPrice() const {
         total_price += quantity * item.getCost();
     }
     
-    return float(total_price) / 100.0f;
+    return float(total_price) / 100.0f; // cents to dollars
 }
 
-} // Anonymous namespace
+} // anonymous namespace
 
 int main(int argc, char* argv[]) {
    
@@ -180,8 +180,12 @@ int main(int argc, char* argv[]) {
         co.scan(i);
     }
 
+    // Get the price. 
+    // Any runtime exceptions fails the application.
+    // Usually the item is not in the pricing rules.
+    // We are unable to recover from this error and 
+    // require an employees assistance. 
     try {
-        // Get the price
         float price = co.getTotalPrice();
         std::cout << "\nTotal : $ " << price << "\n";
     }

@@ -12,7 +12,7 @@ Json parsing header lib downloaded from https://github.com/nlohmann/json.
 ./checkout data.json
 ```
 
-## Example:
+## Example
 ```
 ./checkout data.json 
 bread 1
