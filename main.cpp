@@ -87,8 +87,7 @@ float Checkout::getTotalPrice() const {
 
         auto it = m_pricing_rules.find(sku);
 
-        // Fail if the item is not in the pricing rules.
-        //assert(("Item not in pricing rules", it != m_pricing_rules.end()));
+        // Throw if the item is not in the pricing rules.
         if (it == m_pricing_rules.end()) { throw std::runtime_error("Item not in pricing rules : " + sku); }
 
         auto& item = it->second; 
