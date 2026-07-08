@@ -3,10 +3,11 @@
 #include <unordered_map>
 #include <cassert>
 
-// The class holds the logic for special prices
+// This class holds the logic for special prices
+// Must be in the for of quantity and cost
 // eg 3 for 75 cents
-// eg 2 for one
-// Special prices must always be in the for of quantity and cost
+// eg 2 for one is an quantity of 2 for the cost of a single item
+// eg 20 % off is quantity of 1 and cost of 80 % of the price
 class SpecialPrice {
 
 private:
@@ -18,8 +19,8 @@ public:
     SpecialPrice(unsigned int quantity, unsigned int cost) :
         m_quantity(quantity), m_cost(cost) {}
 
-    unsigned int getQuantity() { return m_quantity; }
-    unsigned int getCost() { return m_cost; }
+    unsigned int getQuantity() const { return m_quantity; }
+    unsigned int getCost() const { return m_cost; }
 
 };
 
@@ -36,16 +37,16 @@ public:
     Item(unsigned int cost, SpecialPrice special_price) : 
         m_cost(cost), m_special_price(special_price) {}
 
-    unsigned int getCost() { return m_cost; }
-    SpecialPrice getSpecialPrice() { return m_special_price; }
-    bool hasSpecialPrice() { return m_special_price.getQuantity() != 0; }
+    unsigned int getCost() const { return m_cost; }
+    SpecialPrice getSpecialPrice() const { return m_special_price; }
+    bool hasSpecialPrice() const { return m_special_price.getQuantity() != 0; }
 
 };
 
 class Checkout {
 
 private:
-    // The item lookup table for each item available in the store
+    // The pricing rules for each item in the store
     std::unordered_map<std::string, Item> m_pricing_rules;
 
     // The current list of items being scanned
@@ -54,14 +55,14 @@ private:
 public:
 
     Checkout (std::unordered_map<std::string, Item> pricing_rules) : 
-        m_pricing_rules(pricing_rules) {} // std::move?
+        m_pricing_rules(std::move(pricing_rules)) {}
 
     void scan(std::string sku) { m_item_list.emplace_back(sku); }
-    float getTotalPrice(); 
+    float getTotalPrice() const; 
 
 };
 
-float Checkout::getTotalPrice() {
+float Checkout::getTotalPrice() const {
    
     // We need a count for each item to see if any special price rules apply 
     std::unordered_map<std::string, size_t> item_count;
@@ -108,16 +109,17 @@ int main() {
     // Pricing rules. A dictionary with the sku as the key and the item as a value.
     // Items include price in cents and special prices.
     // Special prices have quantity and price: eg 3 for 50 cents.
-    // Special price of 0 for 0 is no special price, empty. std::optional?
+    // Special price of (0, 0) is no special price, empty. std::optional?
     std::unordered_map<std::string, Item> pricing_rules = {
         { "apple", Item(25, SpecialPrice(3, 50) ) },
-        { "bannana", Item(25, SpecialPrice(0, 0) ) },
+        { "banana", Item(25, SpecialPrice(0, 0) ) },
         { "oatmeal", Item(50, SpecialPrice(0, 0) ) },
         { "bread", Item(75, SpecialPrice(0, 0) ) }
     };
 
     // The items being scanned at the register
-    std::vector<std::string> item_list = { "apple", "apple", "bannana", "apple", "bread", "oatmeal", "apple" };
+    std::vector<std::string> item_list = {
+        "apple", "apple", "banana", "apple", "bread", "oatmeal", "apple" };
 
     // Create the Checkout
     Checkout co(pricing_rules);
