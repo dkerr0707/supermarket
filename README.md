@@ -6,6 +6,8 @@ Built on Ubuntu 24.0.4.4 LTS.
 
 Json parsing header lib downloaded from https://github.com/nlohmann/json.
 
+```
 ./build.sh
 ./checkout data.json
+```
 
