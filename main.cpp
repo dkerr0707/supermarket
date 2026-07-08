@@ -119,10 +119,33 @@ float Checkout::getTotalPrice() const {
 
 } // Anonymous namespace
 
-int main() {
+int main(int argc, char* argv[]) {
+   
+    // Get the input data file and do some validation 
+    std::string dataFile;
+    if (argc != 2) {
+        std::cout << "Usage: ./checkout data.json\n";
+        return EXIT_FAILURE;
+    }
+    else {
+        dataFile = argv[1];
+        if (std::filesystem::exists(dataFile) == false) {
+            std::cout << "Input file does not exist\n";
+            return EXIT_FAILURE;
+        }
+    }
 
-    std::ifstream f("data.json");
-    json data = json::parse(f);    
+    std::ifstream f(dataFile);
+    json data;
+
+    // Parse the file and catch any errors
+    try {
+        data = json::parse(f);
+    }
+    catch (const json::parse_error& e) {
+        std::cout << "Json parse error - " << e.what() << "\n";
+        return EXIT_FAILURE;
+    }   
 
     // Pricing rules. A dictionary with the sku as the key and the item as a value.
     // Items include price in cents and/or special prices.
@@ -134,13 +157,14 @@ int main() {
     for (const auto& rules: data["pricing_rules"]) {
 
         if (rules.contains("special_price")) {
-            const auto& special_price = rules["special_price"];
+            auto& special_price = rules["special_price"];
             pricing_rules.insert(
                 std::make_pair(
                     rules["sku"], 
                     Item(rules["cost"], SpecialPrice(special_price["quantity"], special_price["cost"]))));
         }
         else {
+            // No special price
             pricing_rules.insert(std::make_pair(rules["sku"], Item(rules["cost"])));
         }
     }
