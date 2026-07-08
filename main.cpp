@@ -3,6 +3,9 @@
 #include <unordered_map>
 #include <cassert>
 #include <optional>
+#include <stdexcept>
+
+namespace {
 
 // This class holds the logic for special prices
 // Must be in the for of quantity and cost
@@ -85,7 +88,8 @@ float Checkout::getTotalPrice() const {
         auto it = m_pricing_rules.find(sku);
 
         // Fail if the item is not in the pricing rules.
-        assert(("Item not in pricing rules", it != m_pricing_rules.end())); 
+        //assert(("Item not in pricing rules", it != m_pricing_rules.end()));
+        if (it == m_pricing_rules.end()) { throw std::runtime_error("Item not in pricing rules : " + sku); }
 
         auto& item = it->second; 
 
@@ -107,9 +111,10 @@ float Checkout::getTotalPrice() const {
         total_price += quantity * item.getCost();
     }
     
-
     return float(total_price) / 100.0f;
 }
+
+} // Anonymous namespace
 
 int main() {
 
@@ -136,9 +141,15 @@ int main() {
         co.scan(i);
     }
 
-    // Get the price
-    float price = co.getTotalPrice();
-    std::cout << "\nTotal : $ " << price << "\n";
+    try {
+        // Get the price
+        float price = co.getTotalPrice();
+        std::cout << "\nTotal : $ " << price << "\n";
+    }
+    catch (const std::runtime_error& e) {
+        std::cerr << "Error - " << e.what() << "\n";
+        return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }
