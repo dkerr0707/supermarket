@@ -1,1 +1,1 @@
-g++ -o checkout main.cpp
+g++ -std=c++17 main.cpp -o checkout

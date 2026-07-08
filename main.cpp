@@ -2,6 +2,7 @@
 #include <vector>
 #include <unordered_map>
 #include <cassert>
+#include <optional>
 
 // This class holds the logic for special prices
 // Must be in the for of quantity and cost
@@ -24,22 +25,24 @@ public:
 
 };
 
-// Item class holds the cost of each item and the special price class
+// Item class holds the cost of each item in pennies and an optional the special price class.
+// Not all items have a special price.
 // The sku was not necessary in the class because it is kept as
 // the dictionary key. See pricing rules in the main function.
 class Item {
 
 private:
     unsigned int m_cost; // in pennies
-    SpecialPrice m_special_price;
+    std::optional<SpecialPrice> m_special_price;
 
 public:
+    Item(unsigned int cost) : m_cost(cost) {}
+
     Item(unsigned int cost, SpecialPrice special_price) : 
         m_cost(cost), m_special_price(special_price) {}
 
     unsigned int getCost() const { return m_cost; }
-    SpecialPrice getSpecialPrice() const { return m_special_price; }
-    bool hasSpecialPrice() const { return m_special_price.getQuantity() != 0; }
+    std::optional<SpecialPrice> getSpecialPrice() const { return m_special_price; }
 
 };
 
@@ -84,14 +87,14 @@ float Checkout::getTotalPrice() const {
 
         // Check for special price and charge items at that price for the given quantity
         // Items remaining will be changed regular price
-        if (item.hasSpecialPrice()) {
+        auto specialPrice = item.getSpecialPrice();
+        if (specialPrice.has_value()) {
             
-            auto specialPrice = item.getSpecialPrice();
-            auto multiple = quantity / specialPrice.getQuantity();
+            auto multiple = quantity / specialPrice->getQuantity();
             if (multiple > 0) {
-                total_price += multiple * specialPrice.getCost();
+                total_price += multiple * specialPrice->getCost();
                 // remove the items that receive a special price
-                item_count[sku] -= multiple * specialPrice.getQuantity();
+                item_count[sku] -= multiple * specialPrice->getQuantity();
             }
             
         }
@@ -107,14 +110,14 @@ float Checkout::getTotalPrice() const {
 int main() {
 
     // Pricing rules. A dictionary with the sku as the key and the item as a value.
-    // Items include price in cents and special prices.
+    // Items include price in cents and/or special prices.
     // Special prices have quantity and price: eg 3 for 50 cents.
-    // Special price of (0, 0) is no special price, empty. std::optional?
+    // Not all items have special prices.
     std::unordered_map<std::string, Item> pricing_rules = {
         { "apple", Item(25, SpecialPrice(3, 50) ) },
-        { "banana", Item(25, SpecialPrice(0, 0) ) },
-        { "oatmeal", Item(50, SpecialPrice(0, 0) ) },
-        { "bread", Item(75, SpecialPrice(0, 0) ) }
+        { "banana", Item(25) },
+        { "oatmeal", Item(50) },
+        { "bread", Item(75) }
     };
 
     // The items being scanned at the register
@@ -131,7 +134,7 @@ int main() {
 
     // Get the price
     float price = co.getTotalPrice();
-    std::cout << "Total : $ " << price << "\n";
+    std::cout << "\nTotal : $ " << price << "\n";
 
     return EXIT_SUCCESS;
 }
