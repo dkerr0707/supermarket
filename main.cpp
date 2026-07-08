@@ -1,7 +1,12 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <cassert>
 
+// The class holds the logic for special prices
+// eg 3 for 75 cents
+// eg 2 for one
+// Special prices must always be in the for of quantity and cost
 class SpecialPrice {
 
 private:
@@ -18,6 +23,9 @@ public:
 
 };
 
+// Item class holds the cost of each item and the special price class
+// The sku was not necessary in the class because it is kept as
+// the dictionary key. See pricing rules in the main function.
 class Item {
 
 private:
@@ -38,15 +46,15 @@ class Checkout {
 
 private:
     // The item lookup table for each item available in the store
-    std::unordered_map<std::string, Item> m_item_lookup;
+    std::unordered_map<std::string, Item> m_pricing_rules;
 
     // The current list of items being scanned
     std::vector<std::string> m_item_list;
 
 public:
 
-    Checkout (std::unordered_map<std::string, Item> item_lookup) : 
-        m_item_lookup(item_lookup) {}
+    Checkout (std::unordered_map<std::string, Item> pricing_rules) : 
+        m_pricing_rules(pricing_rules) {} // std::move?
 
     void scan(std::string sku) { m_item_list.emplace_back(sku); }
     float getTotalPrice(); 
@@ -54,21 +62,22 @@ public:
 };
 
 float Checkout::getTotalPrice() {
-    
+   
+    // We need a count for each item to see if any special price rules apply 
     std::unordered_map<std::string, size_t> item_count;
     for (const auto& i: m_item_list) {
         item_count[i]++;
-        // std::cout << "--> " << i << " " << item_count[i] << "\n";
     }
    
-    unsigned int checkout_sum = 0; 
+    unsigned int total_price = 0; 
 
     for (const auto& [sku, quantity]: item_count) {
         std::cout << sku << " " << quantity << "\n";
 
-        auto it = m_item_lookup.find(sku);
+        auto it = m_pricing_rules.find(sku);
+
         // Fail if the item is not in the lookup table.
-        if (it == m_item_lookup.end()) { std::cout << "Item not in lookup\n"; return 0.0; }
+        assert(("Item not in pricing rules", it != m_pricing_rules.end())); 
 
         auto& item = it->second; 
 
@@ -79,26 +88,27 @@ float Checkout::getTotalPrice() {
             auto specialPrice = item.getSpecialPrice();
             auto multiple = quantity / specialPrice.getQuantity();
             if (multiple > 0) {
-                checkout_sum += multiple * specialPrice.getCost();
+                total_price += multiple * specialPrice.getCost();
                 // remove the items that receive a special price
                 item_count[sku] -= multiple * specialPrice.getQuantity();
             }
             
         }
-        checkout_sum += quantity * item.getCost();
+
+        // All non special price items
+        total_price += quantity * item.getCost();
     }
     
 
-    return float(checkout_sum) / 100;
+    return float(total_price) / 100.0f;
 }
 
 int main() {
 
     // Pricing rules. A dictionary with the sku as the key and the item as a value.
-    // Item includes quantity and special prices.
-    // Special prices are quantity and price: eg 3 for 50 cents.
-    // You could also do 2 for one: eg 2 for 25 cents.
-    // Special price of 0 for 0 is no special price, empty.
+    // Items include price in cents and special prices.
+    // Special prices have quantity and price: eg 3 for 50 cents.
+    // Special price of 0 for 0 is no special price, empty. std::optional?
     std::unordered_map<std::string, Item> pricing_rules = {
         { "apple", Item(25, SpecialPrice(3, 50) ) },
         { "bannana", Item(25, SpecialPrice(0, 0) ) },
