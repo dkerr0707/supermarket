@@ -23,8 +23,10 @@ apple 4
 Total : $ 2.25
 ```
 
+## Data File
+The data.json file contains all the pricing rules and a list of items for the checkout. Data updates do not require recompilation. Since pricing information can change often I felt this was an appropriate architecure.
+
 ## TODO
 - Unit tests
 - More advanced build system
-
 
