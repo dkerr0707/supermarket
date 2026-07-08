@@ -1,4 +1,4 @@
-This is a simple Supermarket application for Cristie Digital.
+#A simple Supermarket application for Cristie Digital.
 
 Requires C++ 17 for std::optional, see build.sh.
 
@@ -9,5 +9,16 @@ Json parsing header lib downloaded from https://github.com/nlohmann/json.
 ```
 ./build.sh
 ./checkout data.json
+```
+
+#Example:
+```
+./checkout data.json 
+bread 1
+banana 1
+oatmeal 1
+apple 4
+
+Total : $ 2.25
 ```
 
