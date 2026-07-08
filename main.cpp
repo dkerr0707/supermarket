@@ -4,6 +4,10 @@
 #include <cassert>
 #include <optional>
 #include <stdexcept>
+#include <fstream>
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 namespace {
 
@@ -117,20 +121,32 @@ float Checkout::getTotalPrice() const {
 
 int main() {
 
+    std::ifstream f("data.json");
+    json data = json::parse(f);    
+
     // Pricing rules. A dictionary with the sku as the key and the item as a value.
     // Items include price in cents and/or special prices.
     // Special prices have quantity and price: eg 3 for 50 cents.
     // Not all items have special prices.
-    std::unordered_map<std::string, Item> pricing_rules = {
-        { "apple", Item(25, SpecialPrice(3, 50) ) },
-        { "banana", Item(25) },
-        { "oatmeal", Item(50) },
-        { "bread", Item(75) }
-    };
+    std::unordered_map<std::string, Item> pricing_rules;
+
+    // move the json data into the pricing rules
+    for (const auto& rules: data["pricing_rules"]) {
+
+        if (rules.contains("special_price")) {
+            const auto& special_price = rules["special_price"];
+            pricing_rules.insert(
+                std::make_pair(
+                    rules["sku"], 
+                    Item(rules["cost"], SpecialPrice(special_price["quantity"], special_price["cost"]))));
+        }
+        else {
+            pricing_rules.insert(std::make_pair(rules["sku"], Item(rules["cost"])));
+        }
+    }
 
     // The items being scanned at the register
-    std::vector<std::string> item_list = {
-        "apple", "apple", "banana", "apple", "bread", "oatmeal", "apple" };
+    std::vector<std::string> item_list = data["items"];
 
     // Create the Checkout
     Checkout co(pricing_rules);

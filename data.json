@@ -1,0 +1,10 @@
+{
+    "pricing_rules": [ 
+        {"sku": "apple", "cost": 25, "special_price" : { "quantity": 3, "cost": 50 } },
+        {"sku": "banana", "cost": 25 },
+        {"sku": "oatmeal", "cost": 50 },
+        {"sku": "bread", "cost": 75 }
+    ],
+
+    "items": ["apple", "apple", "banana", "apple", "bread", "oatmeal", "apple"]
+}
