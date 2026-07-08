@@ -46,6 +46,8 @@ public:
 
 };
 
+// The checkout class that holds the pricing rules and the current list of items
+// getTotalPrice calculates the current total price of the item list.
 class Checkout {
 
 private:
@@ -65,6 +67,8 @@ public:
 
 };
 
+// Main price logic. Calculate the current price for items in the list.
+// If new items are added this function must be called to get the total price.
 float Checkout::getTotalPrice() const {
    
     // We need a count for each item to see if any special price rules apply 
@@ -75,12 +79,12 @@ float Checkout::getTotalPrice() const {
    
     unsigned int total_price = 0; 
 
-    for (const auto& [sku, quantity]: item_count) {
+    for (auto& [sku, quantity]: item_count) {
         std::cout << sku << " " << quantity << "\n";
 
         auto it = m_pricing_rules.find(sku);
 
-        // Fail if the item is not in the lookup table.
+        // Fail if the item is not in the pricing rules.
         assert(("Item not in pricing rules", it != m_pricing_rules.end())); 
 
         auto& item = it->second; 
@@ -94,7 +98,7 @@ float Checkout::getTotalPrice() const {
             if (multiple > 0) {
                 total_price += multiple * specialPrice->getCost();
                 // remove the items that receive a special price
-                item_count[sku] -= multiple * specialPrice->getQuantity();
+                quantity -= multiple * specialPrice->getQuantity();
             }
             
         }
